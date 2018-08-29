@@ -69,8 +69,8 @@ ggplot(vancouver) +
 # Transit Stops
 Next we query all transit stops in the bounding box and clip them to the City of Vancouver and identify the high frequency B-line and Skytrain stops
 ```{r}
-stops <- simpleCache(get_transit_stops(list(bbox=bbox,per_page=1000),get_all=TRUE),"yvr_transit_stops") %>%
-  filter(st_intersects(.,vancouver)>0)
+stops <- simpleCache(get_transit_stops(list(bbox=bbox,per_page=1000),get_all=TRUE),"yvr_transit_stops",refresh = TRUE) %>%
+  st_intersection(vancouver %>% select(geometry))
 
 bline_skytrain_routes="099|095|096| Line"
 # label the stops by route

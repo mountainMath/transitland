@@ -8,11 +8,7 @@ query_string_from_params<-function(params){
     }) %>% unlist, collapse = "&")
 }
 
-robust_rbind <- function(data,new_data){
-  for (x in setdiff(names(data),names(new_data))) new_data[x]=NA
-  for (x in setdiff(names(new_data),names(data))) data[x]=NA
-  data <- rbind(data,new_data)
-}
+
 
 #' Get stops data
 #' @export
@@ -23,22 +19,23 @@ get_transit_stops<-function(params,get_all=FALSE){
   if (get_all & is.null(params$per_page)) params$total="true"
   meta=list("next"=paste0(base_url,"stops","?",query_string_from_params(params)))
   first=TRUE
-  data=NA
+  data=NULL
   while ((first|get_all) & "next" %in% names(meta)) {
     json_data <- jsonlite::fromJSON(meta[["next"]])
     meta <- json_data$meta
     feature_collection <- list("type"="FeatureCollection","features"=json_data$stops)
     temp <- tempfile()
     jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp) %>% select(-geometry_centroid)
+    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) %>% select(-geometry_centroid)
     unlink(temp)
     if (first) {
       data <- new_data
       first=FALSE
     } else {
-      data <- robust_rbind(data,new_data)
+      data <- dplyr::bind_rows(data,new_data) %>% sf::st_sf(stringsAsFactors=FALSE)
     }
   }
+  if (is.na(sf::st_crs(data))) st_crs(data)=4326
   data
 }
 
@@ -66,7 +63,7 @@ get_transit_schedule_stops<-function(params,get_all=FALSE){
       data <- json_data$schedule_stop_pairs %>% as.tibble
     } else {
       cat("\r",paste0("API call number ",count))
-      data <- rbind(data,json_data$schedule_stop_pairs %>% as.tibble)
+      data <- dplyr::bind_rows(data,json_data$schedule_stop_pairs %>% as.tibble)
     }
   }
   data
@@ -86,22 +83,23 @@ get_transit_routes<-function(params,get_all=FALSE){
   if (length(params)==0) stop("Invalid parameters")
   meta=list("next"=paste0(base_url,"routes","?",query_string_from_params(params)))
   first=TRUE
-  data=NA
+  data=NULL
   while ((first|get_all) & "next" %in% names(meta)) {
     json_data <- jsonlite::fromJSON(meta[["next"]])
     meta <- json_data$meta
     feature_collection <- list("type"="FeatureCollection","features"=json_data$routes)
     temp <- tempfile()
     jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp) #%>% select(-geometry_centroid)
+    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) #%>% select(-geometry_centroid)
     unlink(temp)
     if (first) {
       data <- new_data
       first=FALSE
     } else {
-      data <- rbind(data,new_data)
+      data <- dplyr::bind_rows(data,new_data) %>% sf::st_sf(stringsAsFactors=FALSE)
     }
   }
+  if (is.na(sf::st_crs(data))) st_crs(data)=4326
   data
 }
 
@@ -119,22 +117,23 @@ get_transit_route_stop_patterns<-function(params,get_all=FALSE){
   if (length(params)==0) stop("Invalid parameters")
   meta=list("next"=paste0(base_url,"route_stop_patterns","?",query_string_from_params(params)))
   first=TRUE
-  data=NA
+  data=NULL
   while ((first|get_all) & "next" %in% names(meta)) {
     json_data <- jsonlite::fromJSON(meta[["next"]])
     meta <- json_data$meta
     feature_collection <- list("type"="FeatureCollection","features"=json_data$route_stop_patterns)
     temp <- tempfile()
     jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp) #%>% select(-geometry_centroid)
+    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) #%>% select(-geometry_centroid)
     unlink(temp)
     if (first) {
       data <- new_data
       first=FALSE
     } else {
-      data <- rbind(data,new_data)
+      data <- dplyr::bind_rows(data,new_data) %>% sf::st_sf(stringsAsFactors=FALSE)
     }
   }
+  if (is.na(sf::st_crs(data))) st_crs(data)=4326
   data
 }
 
