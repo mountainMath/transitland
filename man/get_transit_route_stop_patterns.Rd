@@ -4,7 +4,7 @@
 \alias{get_transit_route_stop_patterns}
 \title{Get transit route stop patterns}
 \usage{
-get_transit_route_stop_patterns(params, get_all = TRUE)
+get_transit_route_stop_patterns(params, get_all = FALSE)
 }
 \arguments{
 \item{parms}{list of query parameters. Valid parameters are

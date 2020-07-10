@@ -4,7 +4,7 @@
 \alias{get_transit_stops}
 \title{Get stops data}
 \usage{
-get_transit_stops(params, get_all = TRUE)
+get_transit_stops(params, get_all = FALSE)
 }
 \description{
 Get stops data

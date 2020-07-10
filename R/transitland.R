@@ -23,11 +23,18 @@ get_transit_stops<-function(params,get_all=FALSE){
   while ((first|get_all) & "next" %in% names(meta)) {
     json_data <- jsonlite::fromJSON(meta[["next"]])
     meta <- json_data$meta
-    feature_collection <- list("type"="FeatureCollection","features"=json_data$stops)
-    temp <- tempfile()
-    jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) %>% select(-geometry_centroid)
-    unlink(temp)
+    data <- json_data$stops %>%
+      as_tibble()
+    new_data <-  jsonlite::toJSON(data$geometry,
+                                  flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE) %>%
+      geojsonsf::geojson_sf() %>%
+      bind_cols(data %>% select(-geometry))
+
+    # feature_collection <- list("type"="FeatureCollection","features"=json_data$stops)
+    # temp <- tempfile()
+    # jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
+    # new_data <- geojsonsf::geojson_sf(temp)
+    # unlink(temp)
     if (first) {
       data <- new_data
       first=FALSE
@@ -86,12 +93,15 @@ get_transit_routes<-function(params,get_all=FALSE){
   data=NULL
   while ((first|get_all) & "next" %in% names(meta)) {
     json_data <- jsonlite::fromJSON(meta[["next"]])
+
     meta <- json_data$meta
-    feature_collection <- list("type"="FeatureCollection","features"=json_data$routes)
-    temp <- tempfile()
-    jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) #%>% select(-geometry_centroid)
-    unlink(temp)
+    data <- json_data$routes %>%
+      as_tibble()
+    new_data <-  jsonlite::toJSON(data$geometry,
+                                  flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE) %>%
+      geojsonsf::geojson_sf() %>%
+      bind_cols(data %>% select(-geometry))
+
     if (first) {
       data <- new_data
       first=FALSE
@@ -124,7 +134,7 @@ get_transit_route_stop_patterns<-function(params,get_all=FALSE){
     feature_collection <- list("type"="FeatureCollection","features"=json_data$route_stop_patterns)
     temp <- tempfile()
     jsonlite::write_json(feature_collection,temp, flatten=TRUE,simplifyVector=TRUE,auto_unbox=TRUE)
-    new_data <- sf::read_sf(temp,stringsAsFactors=FALSE) #%>% select(-geometry_centroid)
+    new_data <- geojsonsf::geojson_sff(temp) #%>% select(-geometry_centroid)
     unlink(temp)
     if (first) {
       data <- new_data

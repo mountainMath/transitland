@@ -4,7 +4,7 @@
 \alias{get_transit_schedule_stops}
 \title{Get schedule stop pairs}
 \usage{
-get_transit_schedule_stops(params, get_all = TRUE)
+get_transit_schedule_stops(params, get_all = FALSE)
 }
 \arguments{
 \item{parms}{list of query parameters. Valid parameters are

@@ -4,7 +4,7 @@
 \alias{get_transit_routes}
 \title{Get transit routes}
 \usage{
-get_transit_routes(params, get_all = TRUE)
+get_transit_routes(params, get_all = FALSE)
 }
 \arguments{
 \item{parms}{list of query parameters. Valid parameters are
